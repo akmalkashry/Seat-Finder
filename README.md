@@ -1,8 +1,12 @@
 <img width="1334" height="564" alt="Image" src="https://github.com/user-attachments/assets/b9008c78-2409-45f2-80f5-0d0195574e10" />
 
 URL: _https://shorturl.at/5tpET_
+
 Form: _https://forms.gle/Q8bis7tN3iQxjbbP6_
+
 Sheet: _https://docs.google.com/spreadsheets/d/1m0lpFxgCXQVAEqPpaSY1wsqFcEvyYqcy8jzif6OyxKU/edit?usp=sharing_
+
+
 # 🎟️ Seat-Finder — Wedding Guest Table Lookup System
 
 Seat-Finder is a custom-built web application designed for my wedding event to help guests easily find their assigned table number by searching their name.
