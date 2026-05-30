@@ -564,6 +564,7 @@
     </div>
   </div>
 
+  //Google Apps Script doesn't support separate frontend .js files in its editor. To keep the project organized, we write our JavaScript inside a javascript.html file and inject its content here using HtmlService.
   <?!= HtmlService.createHtmlOutputFromFile('javascript').getContent(); ?>
 </body>
 </html>
