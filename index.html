@@ -1,0 +1,569 @@
+// Ensure on Google Sheet, click Extensions>Apps Script
+
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Base Layout & Dynamic Centering */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f1f3f5;
+      color: #212529;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    /* Responsive Wrapper */
+    .search-wrapper {
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    /* Header Container for Title */
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+
+    h2 {
+      font-weight: 600;
+      font-size: 24px;
+      letter-spacing: -0.5px;
+      margin: 0;
+      color: #000000;
+    }
+
+    .search-container {
+      position: relative;
+      width: 100%;
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Input Styling */
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background-color: #ffffff;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #000000;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Search Button */
+    button.search-btn {
+      padding: 14px 22px;
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button.search-btn:hover {
+      background-color: #222222;
+    }
+
+    /* Dropdown Suggestions */
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: none;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .suggestions div {
+      padding: 14px 16px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background-color 0.15s;
+      border-bottom: 1px solid #f8f9fa;
+    }
+
+    .suggestions div:last-child {
+      border-bottom: none;
+    }
+
+    .suggestions div:hover {
+      background-color: #f1f3f5;
+    }
+
+    /* Seating Assignment Card */
+    .seating-card {
+      width: 100%;
+      max-width: 450px;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 30px 24px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      box-sizing: border-box;
+      display: none;
+      margin-bottom: 24px;
+    }
+
+    .seating-card p {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #000000;
+      letter-spacing: -0.3px;
+    }
+
+    /* Bottom Control Layout Container */
+    .bottom-controls-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 8px;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    /* Links Row Layout Container */
+    .links-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* Bullet Dot styling */
+    .link-divider {
+      font-size: 10px;
+      color: #adb5bd;
+      user-select: none;
+    }
+
+    /* Text Link Buttons */
+    .plan-link {
+      font-size: 13px;
+      color: #6c757d;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .plan-link:hover {
+      color: #000000;
+    }
+
+    /* PREMIUM LIQUID-GLASS SLIDER TOGGLE STYLING */
+    .glass-toggle {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 140px; 
+      height: 34px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2px;
+      box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.4), 0 4px 14px rgba(0, 0, 0, 0.05);
+      user-select: none;
+      -webkit-user-select: none; 
+      box-sizing: border-box;
+      touch-action: none; 
+    }
+
+    /* Sliding Dark Fluid Pill Indicator */
+    .glass-pill {
+      position: absolute;
+      left: 3px;
+      width: 44px;
+      height: 26px;
+      background: linear-gradient(180deg, #111111 0%, #000000 100%);
+      border-radius: 14px;
+      z-index: 1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    .glass-pill:active {
+      cursor: grabbing;
+    }
+
+    .glass-pill.snap-transition {
+      transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .glass-toggle::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
+      border-radius: 20px 20px 0 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .toggle-labels-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .toggle-label {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #555555; 
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+      pointer-events: none; 
+    }
+
+    .glass-toggle[data-active-lang="EN"] .label-en,
+    .glass-toggle[data-active-lang="BM"] .label-bm,
+    .glass-toggle[data-active-lang="SWK"] .label-swk {
+      color: #ffffff; 
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    }
+
+    /* MODAL WINDOW BASE OVERLAY */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .modal-content {
+      background-color: #ffffff;
+      padding: 24px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 450px;
+      max-height: 90vh;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .modal-header-text {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-header-text h4 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #000000;
+    }
+
+    .modal-header-text p {
+      margin: 0;
+      font-size: 15px;
+      color: #6c757d;
+    }
+
+    .modal-image-container {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-image-container img {
+      max-width: 100%;
+      max-height: 45vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .help-content h4, .contact-content h4 {
+      margin: 0 0 16px 0;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .help-flow {
+      text-align: left;
+      padding-left: 20px;
+      margin: 0 0 20px 0;
+    }
+
+    .help-flow li {
+      margin-bottom: 12px;
+      font-size: 15px;
+      color: #495057;
+      line-height: 1.4;
+    }
+
+    .case-note {
+      font-size: 13px;
+      color: #e63946;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .contact-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: #212529;
+    }
+
+    .whatsapp-icon-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .whatsapp-icon-link:hover {
+      transform: scale(1.1);
+    }
+
+    .whatsapp-icon-link svg {
+      width: 32px;
+      height: 32px;
+      fill: #25D366;
+    }
+
+    .modal-btn-group {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+      text-align: center;
+    }
+
+    .modal-save-btn {
+      background-color: #000000;
+      color: #ffffff;
+    }
+
+    .modal-save-btn:hover {
+      background-color: #222222;
+    }
+
+    .modal-close-btn {
+      background-color: #f1f3f5;
+      color: #495057;
+    }
+
+    .modal-close-btn:hover {
+      background-color: #e9ecef;
+      color: #212529;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        justify-content: flex-start;
+        padding-top: 30px;
+      }
+      
+      .search-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      button.search-btn {
+        width: 100%;
+      }
+      
+      .suggestions {
+        top: 54px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="search-wrapper">
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+      <div id="lang-toggle" class="glass-toggle" data-active-lang="EN">
+        <div id="glass-pill" class="glass-pill snap-transition" draggable="false"></div>
+        <div class="toggle-labels-container">
+          <span class="toggle-label label-en">EN</span>
+          <span class="toggle-label label-bm">BM</span>
+          <span class="toggle-label label-swk">SWK</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-container">
+      <h2 id="main-heading">Find Your Seat</h2>
+    </div>
+    
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Type your name..." autocomplete="off">
+      <div id="suggestions-box" class="suggestions"></div>
+      <button id="find-btn" class="search-btn" onclick="displayUserData()">Find Table</button>
+    </div>
+  </div>
+
+  <div id="seating-display" class="seating-card">
+    <p id="user-assignment"></p>
+  </div>
+
+  <div class="bottom-controls-wrapper">
+    <div class="links-container">
+      <button id="link-help" class="plan-link" onclick="openHelpModal()">Help</button>
+      <span class="link-divider">&bull;</span>
+      <button id="link-plan" class="plan-link" onclick="openPlanModal()">Seat Plan</button>
+      <span class="link-divider">&bull;</span>
+      <button id="link-missing" class="plan-link" onclick="openContactModal()">Missing?</button>
+    </div>
+  </div>
+
+  <div id="plan-modal" class="modal" onclick="closeOutsideModal(event, 'plan-modal')">
+    <div class="modal-content">
+      <div class="modal-header-text">
+        <h4 id="popup-user-name">Guest Plan</h4>
+        <p id="popup-user-table">Please search a name first</p>
+      </div>
+      <div class="modal-image-container">
+        <img id="floor-plan-img" src="https://lh3.googleusercontent.com/d/19-CyS-NWbqm5B-8C8qHAOJvbyMIjggu0" crossorigin="anonymous" alt="Seating Layout Map Blueprint">
+      </div>
+      
+      <div class="modal-btn-group">
+        <button id="close-plan-btn" class="modal-btn modal-close-btn" onclick="document.getElementById('plan-modal').style.display = 'none'">Close</button>
+        <button id="download-pass-btn" class="modal-btn modal-save-btn" onclick="downloadSeatingPassImage()">Download Pass</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="help-modal" class="modal" onclick="closeOutsideModal(event, 'help-modal')">
+    <div class="modal-content help-content">
+      <h4 id="help-title">How to Use</h4>
+      <ol class="help-flow" id="help-steps">
+        <li>Type your name</li>
+        <li>Select from suggestions</li>
+        <li>Click "Find Table"</li>
+        <li>Click "Seat Plan" for layout</li>
+      </ol>
+      <div class="case-note" id="help-note">! Names are not case-sensitive</div>
+      <button id="close-help-btn" class="modal-btn modal-close-btn" onclick="document.getElementById('help-modal').style.display = 'none'">Close</button>
+    </div>
+  </div>
+
+  <div id="contact-modal" class="modal" onclick="closeOutsideModal(event, 'contact-modal')">
+    <div class="modal-content contact-content">
+      <h4 id="contact-title">Contact</h4>
+      
+      <div class="contact-list">
+        <div class="contact-row">
+          <span class="contact-name">Name 1</span>
+          <a class="whatsapp-icon-link" href="https://wa.me/60123456789" target="_blank" rel="noopener noreferrer" title="Chat with Akmal via WhatsApp">
+            <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.292 1.493 4.907 1.493 5.305 0 9.622-4.305 9.625-9.613.002-2.569-1.002-4.984-2.825-6.809-1.821-1.823-4.24-2.827-6.81-2.829-5.319 0-9.633 4.308-9.636 9.622-.001 1.683.456 3.32 1.32 4.803l-.988 3.606 3.707-.972zm11.45-6.19c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z"/></svg>
+          </a>
+        </div>
+        <div class="contact-row">
+          <span class="contact-name">Name 2</span>
+          <a class="whatsapp-icon-link" href="https://wa.me/60198765432" target="_blank" rel="noopener noreferrer" title="Chat with Musfirah via WhatsApp">
+            <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.292 1.493 4.907 1.493 5.305 0 9.622-4.305 9.625-9.613.002-2.569-1.002-4.984-2.825-6.809-1.821-1.823-4.24-2.827-6.81-2.829-5.319 0-9.633 4.308-9.636 9.622-.001 1.683.456 3.32 1.32 4.803l-.988 3.606 3.707-.972zm11.45-6.19c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z"/></svg>
+          </a>
+        </div>
+      </div>
+      
+      <button id="close-contact-btn" class="modal-btn modal-close-btn" onclick="document.getElementById('contact-modal').style.display = 'none'">Close</button>
+    </div>
+  </div>
+
+  <?!= HtmlService.createHtmlOutputFromFile('javascript').getContent(); ?>
+</body>
+</html>
