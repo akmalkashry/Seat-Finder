@@ -1,6 +1,6 @@
 <img width="1334" height="564" alt="Image" src="https://github.com/user-attachments/assets/b9008c78-2409-45f2-80f5-0d0195574e10" />
 
-URL: _https://shorturl.at/5tpET_
+Website URL: _https://sites.google.com/view/testingweddingmy/seat-finder_
 
 Form: _https://forms.gle/Q8bis7tN3iQxjbbP6_
 
@@ -11,7 +11,7 @@ Sheet: _https://docs.google.com/spreadsheets/d/1m0lpFxgCXQVAEqPpaSY1wsqFcEvyYqcy
 
 Seat-Finder is a custom-built web application designed for my wedding event to help guests easily find their assigned table number by searching their name.
 
-The system is powered by Google Forms, Google Sheets, and Google Apps Script, creating a simple but effective automated guest lookup experience.
+The system is powered by Google Forms, Google Sheets, Google Apps Script, and Google Sites creating a simple but effective automated guest lookup experience.
 
 ---
 
@@ -45,7 +45,8 @@ Seat-Finder solves this by building a lightweight automated lookup system:
 - Data is stored in Google Sheets  
 - A structured sheet is created to extract only relevant fields (Name + Table)  
 - Table assignment is manually handled to ensure fairness and organization  
-- Google Apps Script reads the processed data  
+- Google Apps Script reads the processed data
+- Embed the URL from Google Apps to Google Sites
 - Guests search their name in a web interface to find their table instantly  
 
 ---
@@ -61,6 +62,6 @@ Processed Sheet (Name + Manually Assigned Table)
         ↓
 Google Apps Script (Data Reader)
         ↓
-Web App (Seat Finder UI)
+Google Sites (Seat Finder UI)
         ↓
 Guest sees Table Number
